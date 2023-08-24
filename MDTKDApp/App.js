@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   SafeAreaView,
@@ -11,10 +11,9 @@ import {
 } from "react-native";
 import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
-import { useState } from "react";
 import LogoImageComponent from "./Components/LogoImageComponent";
 import NavBarComponent from "./Components/NavBarComponent";
-import NotificationsComponent from "./Components/NotificationsComponent";
+import { FlatList } from "react-native";
 
 const notificationTitles = [
   { notificationTitle: "Upcoming Event", date: "01/01/01" },
@@ -25,6 +24,15 @@ const notificationTitles = [
 ];
 
 export default function App() {
+  const [articles, setArticles] = useState([]);
+
+  useEffect(() => {
+    fetch("https://mdtkd.net/api/articles")
+      .then((response) => response.json())
+      .then((data) => setArticles(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
+
   const name = "David";
   const [showHomeScreen, setShowHomeScreen] = useState(false);
   const handleBoxPress = (title) => {
@@ -38,15 +46,28 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       {/* ----- LOGO COMPONENT ----- */}
-
       <LogoImageComponent />
 
       {/* ----- NOTIFICATIONS COMPONENT ----- */}
-
-      <NotificationsComponent />
+      <View style={styles.notificationsContainer}>
+        <Text style={styles.testHeading}>Notifications</Text>
+        <FlatList
+          data={notificationTitles}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableWithoutFeedback
+              onPress={() => handleBoxPress(item.notificationTitle)}
+            >
+              <View style={styles.testPost}>
+                <Text style={styles.testTitle}>{item.notificationTitle}</Text>
+                <Text>Date: {item.date}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          )}
+        />
+      </View>
 
       {/* ----- NAVBAR COMPONENT ----- */}
-
       <NavBarComponent />
 
       <StatusBar style="auto" />
@@ -59,58 +80,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#292529",
   },
+  notificationsContainer: {
+    padding: 20,
+  },
+  // ...rest of your styles
   imageLogo: {
     width: 240,
     height: 240,
   },
 
-  // content: {
-  //   flex: 1,
-  //   alignItems: "center",
-  //   paddingTop: 40,
-  // },
-  // box: {
-  //   width: "80%",
-  //   padding: 10,
-  //   marginBottom: 80,
-  //   backgroundColor: "#fff",
-  // },
-  // boxTitle: {
-  //   fontSize: 18,
-  //   fontWeight: "bold",
-  //   textAlign: "center",
-  //   marginBottom: 10,
-  //   color: "#292529",
-  // },
-  // showAll: {
-  //   fontSize: 12,
-  //   top: -30,
-  //   textAlign: "right",
-  // },
-  // inner: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   justifyContent: "space-between",
-  //   marginVertical: 10,
-  //   backgroundColor: "#D9D9D9",
-  //   paddingHorizontal: 20,
-  //   minHeight: 40,
-  // },
-  // notificationTitleContainer: {
-  //   flex: 1,
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  // },
-  // notificationTitle: {
-  //   fontSize: 16,
-  //   textAlign: "center",
-  //   color: "#292529",
-  // },
-  // date: {
-  //   fontSize: 14,
-  //   marginRight: 10,
-  //   color: "#292529",
-  // },
+  testHeading: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  testPost: {
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+  },
+  testTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   bottomNavBar: {
     flexDirection: "row",
     justifyContent: "space-around",
